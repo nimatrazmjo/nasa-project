@@ -31,7 +31,12 @@ function loadData () {
             });
     });
 }
+
+function getAllPlanets () {
+    return KapletData;
+}
+
 module.exports = {
     loadData,
-    planets: KapletData
+    getAllPlanets
 }
