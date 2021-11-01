@@ -4,7 +4,8 @@
   "description": "Nasa Mission Control",
   "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "test-watch": "jest --watch --verbose",
     "watch": "nodemon src/server.js",
     "start": "node  src/server.js"
   },
@@ -17,5 +18,9 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "jest": "^27.3.1",
+    "supertest": "^6.1.6"
   }
 }
