@@ -1,25 +1,40 @@
-const launches = new Map();
+const launches = require('./launches.mongo');
+const planets = require('./planets.mongo');
 const launch = {
     flightNumber: 100,
     mission: "Kepler Exploration X",
     rocket: "Explorer IS1",
     launchDate: new Date("December 27, 2025"),
     target: 'Kepler-442 b',
-    customer: ['ZTM', 'NASA'],
+    customers: ['ZTM', 'NASA'],
     upcoming: true,
     success: true
 }
 
 let lastFlightNumber = 100;
 
-launches.set(launch.flightNumber,launch);
+saveLaunch(launch);
 
-function checkIfLaunchExists(launchId) {
-    return launches.has(launchId);
+async function checkIfLaunchExists(launchId) {
+    const launch = await launches.findById(launchId);
+
 }
 
-function getAllLaunches() {
-    return Array.from(launches.values())
+async function getAllLaunches() {
+    return await launches.find({});
+}
+
+async function saveLaunch(launch) {
+    if (!await checkPlanetExists(launch.target)) {
+        throw new Error('Kepler not found');
+    }
+    await launches.updateOne({
+        flightNumber: launch.flightNumber,  
+    },launch,{upsert: true});
+}
+
+async function checkPlanetExists(kelperName) {
+    return await planets.findOne({keplerName: kelperName})
 }
 
 function addNewLaunch(launch) {

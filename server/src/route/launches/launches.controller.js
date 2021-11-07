@@ -6,8 +6,8 @@
      aboardLaunchById,
  } = require('../../model/launch.model');
 
-function httGetAllLaunches(req, res) {
-    res.status(200).json(getAllLaunches());
+async function httGetAllLaunches(req, res) {
+    res.status(200).json(await getAllLaunches());
 }
 
 function httpAddNewLaunch(req, res) {

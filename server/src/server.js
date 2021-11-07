@@ -10,7 +10,7 @@ mongoose.connection.once('open', () => {
 });
 
 mongoose.connection.on('error', ( error) => {
-    console.error(error);
+    console.error(error); 
 });
 async function startSert() {
     await mongoose.connect(MONGO_URL);
