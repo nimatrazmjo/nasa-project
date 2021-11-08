@@ -4,7 +4,7 @@
   "description": "Nasa Mission Control",
   "main": "src/server.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --detectOpenHandles",
     "test-watch": "jest --watch --verbose",
     "watch": "nodemon src/server.js",
     "start": "node  src/server.js"

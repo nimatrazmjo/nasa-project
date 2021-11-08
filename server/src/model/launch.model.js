@@ -1,5 +1,6 @@
 const launches = require('./launches.mongo');
 const planets = require('./planets.mongo');
+const DEFAULT_FLIGHT_NUMBER = 100;
 const launch = {
     flightNumber: 100,
     mission: "Kepler Exploration X",
@@ -11,17 +12,23 @@ const launch = {
     success: true
 }
 
-let lastFlightNumber = 100;
-
 saveLaunch(launch);
 
 async function checkIfLaunchExists(launchId) {
-    const launch = await launches.findById(launchId);
+    return await launches.findOne({flightNumber: launchId});
 
 }
 
 async function getAllLaunches() {
     return await launches.find({});
+}
+
+async function getLatestFlightNumber() {
+    const latestLaunch = await launches.findOne().sort('-flightNumber');
+    if (!latestLaunch) {
+        return DEFAULT_FLIGHT_NUMBER;
+    }
+    return latestLaunch.flightNumber;
 }
 
 async function saveLaunch(launch) {
@@ -31,32 +38,35 @@ async function saveLaunch(launch) {
     await launches.updateOne({
         flightNumber: launch.flightNumber,  
     },launch,{upsert: true});
+    return launch;
 }
 
 async function checkPlanetExists(kelperName) {
     return await planets.findOne({keplerName: kelperName})
 }
 
-function addNewLaunch(launch) {
-    lastFlightNumber++;
-    launches.set(lastFlightNumber,
-        Object.assign(launch,{
-            flightNumber: lastFlightNumber,
-            customer: ['Zero to Mastery', 'NASA'],
-            upcoming: true,
-            success: true
-        }));
+async function scheduleNewLaunch() {
+    const newFlightNumber = await getLatestFlightNumber() +1;
+    const newLaunch = Object.assign(launch,{
+        flightNumber: newFlightNumber,
+        customer: ['Zero to Mastery', 'NASA'],
+        upcoming: true,
+        success: true
+    });
+    return await saveLaunch(newLaunch)
 }
 
-function aboardLaunchById(launchId) {
-    const aborded = launches.get(launchId);
-    aborded.upcoming =  false;
-    aborded.success = false;
-    return aborded;
+async function aboardLaunchById(launchId) {
+   const abortedLaunches =  await launches.updateOne({flightNumber:launchId},{
+        upcoming : false,
+        success : false,
+    });
+    return abortedLaunches.modifiedCount && abortedLaunches.matchedCount === 1
+    
 }
 module.exports = {
     checkIfLaunchExists,
     getAllLaunches,
-    addNewLaunch,
     aboardLaunchById,
+    scheduleNewLaunch
 }
