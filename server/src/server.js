@@ -11,6 +11,7 @@ const server = http.createServer(app);
 async function startSert() {
     await mongoConnect();
     await loadData();
+    await loadLaunchData();
     server.listen(PORT,() => {
         console.log(`App is running on port ${PORT}`);
     });

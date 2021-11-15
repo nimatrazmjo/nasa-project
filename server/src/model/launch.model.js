@@ -1,6 +1,9 @@
+const axios = require('axios');
+
 const launches = require('./launches.mongo');
 const planets = require('./planets.mongo');
 const DEFAULT_FLIGHT_NUMBER = 100;
+const SPACEX_API = 'https://api.spacexdata.com/v4/launches/query';
 const launch = {
     flightNumber: 100,
     mission: "Kepler Exploration X",
@@ -13,6 +16,22 @@ const launch = {
 }
 
 saveLaunch(launch);
+
+async function loadLaunchData() {
+    const launchDate = axios.post(SPACEX_API,{
+        query: {},
+        options: {
+            populate: [
+                {
+                    path: 'rocket',
+                    select: {
+                        name:1
+                    }
+                }
+            ]
+        }
+    });
+}
 
 async function checkIfLaunchExists(launchId) {
     return await launches.findOne({flightNumber: launchId});
@@ -65,6 +84,7 @@ async function aboardLaunchById(launchId) {
     
 }
 module.exports = {
+    loadLaunchData,
     checkIfLaunchExists,
     getAllLaunches,
     aboardLaunchById,
