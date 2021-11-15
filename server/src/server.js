@@ -2,6 +2,7 @@ const http = require('http');
 
 const app = require('./app');
 const { loadData } = require('./model/planets.model');
+const  { loadLaunchData } = require('./model/launch.model');
 const { mongoConnect } = require('./service/mongo');
 
 const PORT = process.env.PORT || 8000;
