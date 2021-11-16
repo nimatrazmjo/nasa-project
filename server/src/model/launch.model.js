@@ -5,36 +5,81 @@ const planets = require('./planets.mongo');
 const DEFAULT_FLIGHT_NUMBER = 100;
 const SPACEX_API = 'https://api.spacexdata.com/v4/launches/query';
 const launch = {
-    flightNumber: 100,
-    mission: "Kepler Exploration X",
-    rocket: "Explorer IS1",
-    launchDate: new Date("December 27, 2025"),
-    target: 'Kepler-442 b',
+    flightNumber: 100, //flight_number
+    mission: "Kepler Exploration X", //name
+    rocket: "Explorer IS1", //rocket.name
+    launchDate: new Date("December 27, 2025"), //date_local
+    target: 'Kepler-442 b', // not applicable
     customers: ['ZTM', 'NASA'],
-    upcoming: true,
-    success: true
+    upcoming: true, //upcoming
+    success: true // success
 }
 
 saveLaunch(launch);
 
-async function loadLaunchData() {
-    const launchDate = axios.post(SPACEX_API,{
+async function loadLaunchs () {
+  try {
+    const launchDocs = await axios.post(SPACEX_API,{
         query: {},
         options: {
+            pagination: false,
             populate: [
                 {
                     path: 'rocket',
                     select: {
                         name:1
                     }
+                },
+                {
+                    path: 'payloads',
+                    select: {
+                        customers:1
+                    }
                 }
             ]
         }
     });
+    for (const launchDoc of launchDocs.data.docs) {
+        const payloads = launchDoc['payloads'];
+        const customers = payloads.flatMap(payload => payload['customers']);
+        const launch = {
+            flightNumber: launchDoc['flight_number'],
+            mission: launchDoc['name'],
+            rocket: launchDoc['rocket']['name'],
+            launchDate: launchDoc['launch_date'],
+            upcoming: launchDoc['upcoming'],
+            success: launchDoc['success'],
+            customers
+        }
+
+        console.log(launch.flightNumber, launch.mission);
+    }   
+  } catch (error) {
+      
+  }
+}
+
+async function loadLaunchData() {
+
+    try {
+
+        const firstLaunch = await findLaunch({flightNumber:1, rocket: 'Falcon 1', mission: 'FalconSat'});
+        if (firstLaunch) {
+            console.log('Launch Data has already been loaded');
+            return;
+        }
+        await loadLaunchs();
+    } catch (error) {
+        console.log(error,'Err')
+    }
+}
+
+async function findLaunch(filter) {
+    return await launches.findOne(filter)
 }
 
 async function checkIfLaunchExists(launchId) {
-    return await launches.findOne({flightNumber: launchId});
+    return await findLaunch({flightNumber: launchId});
 
 }
 
