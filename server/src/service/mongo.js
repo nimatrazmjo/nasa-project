@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
-// const MONGO_URL = `mongodb+srv://nasa-api:nasa123@nimatlearning.hek3h.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
-const MONGO_URL = `mongodb://localhost:27017/nasa-project`
+const MONGO_URL = `mongodb+srv://nasa-api:nasa123@nimatlearning.hek3h.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
+// const MONGO_URL = `mongodb://localhost:27017/nasa-project`
 
 mongoose.connection.once('open', () => {
   console.log('connected to mongodb');

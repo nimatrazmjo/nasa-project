@@ -6,8 +6,15 @@
      scheduleNewLaunch,
  } = require('../../model/launch.model');
 
+ const {
+     getPagination,
+ } = require('../../service/query');
+
 async function httGetAllLaunches(req, res) {
-    res.status(200).json(await getAllLaunches());
+    
+    const {skip, limit} = getPagination(req.query);
+    const launches = await getAllLaunches(skip, limit)
+    res.status(200).json(launches);
 }
 
 async function httpAddNewLaunch(req, res) {

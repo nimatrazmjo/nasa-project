@@ -4,18 +4,6 @@ const launches = require('./launches.mongo');
 const planets = require('./planets.mongo');
 const DEFAULT_FLIGHT_NUMBER = 100;
 const SPACEX_API = 'https://api.spacexdata.com/v4/launches/query';
-const launch = {
-    flightNumber: 100, //flight_number
-    mission: "Kepler Exploration X", //name
-    rocket: "Explorer IS1", //rocket.name
-    launchDate: new Date("December 27, 2025"), //date_local
-    target: 'Kepler-442 b', // not applicable
-    customers: ['ZTM', 'NASA'],
-    upcoming: true, //upcoming
-    success: true // success
-}
-
-saveLaunch(launch);
 
 async function loadLaunchs () {
   try {
@@ -51,8 +39,8 @@ async function loadLaunchs () {
             success: launchDoc['success'],
             customers
         }
-
-        console.log(launch.flightNumber, launch.mission);
+        console.log(launch.flightNumber,launch.mission);
+        await saveLaunch(launch);
     }   
   } catch (error) {
       
@@ -60,9 +48,7 @@ async function loadLaunchs () {
 }
 
 async function loadLaunchData() {
-
     try {
-
         const firstLaunch = await findLaunch({flightNumber:1, rocket: 'Falcon 1', mission: 'FalconSat'});
         if (firstLaunch) {
             console.log('Launch Data has already been loaded');
@@ -83,8 +69,11 @@ async function checkIfLaunchExists(launchId) {
 
 }
 
-async function getAllLaunches() {
-    return await launches.find({});
+async function getAllLaunches(skip, limit) {
+    return await launches.find({})
+        .sort({flightNumber: 1})
+        .skip(skip)
+        .limit(limit);
 }
 
 async function getLatestFlightNumber() {
@@ -96,9 +85,7 @@ async function getLatestFlightNumber() {
 }
 
 async function saveLaunch(launch) {
-    if (!await checkPlanetExists(launch.target)) {
-        throw new Error('Kepler not found');
-    }
+   
     await launches.updateOne({
         flightNumber: launch.flightNumber,  
     },launch,{upsert: true});
@@ -110,6 +97,9 @@ async function checkPlanetExists(kelperName) {
 }
 
 async function scheduleNewLaunch() {
+    if (!await checkPlanetExists(launch.target)) {
+        throw new Error('Kepler not found');
+    } 
     const newFlightNumber = await getLatestFlightNumber() +1;
     const newLaunch = Object.assign(launch,{
         flightNumber: newFlightNumber,
